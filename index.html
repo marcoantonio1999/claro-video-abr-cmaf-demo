@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Claro Video · ABR Streaming MVP</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script src="https://cdn.dashjs.org/v4.7.4/dash.all.min.js"></script>
+<script src="assets/vendor/qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --panel: #141414;
+    --border: #262626;
+    --text: #ffffff;
+    --muted: #9a9a9a;
+    --accent: #DA291C;       /* rojo Claro */
+    --accent-dark: #B0211A;
+    --good: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+
+  /* Header tipo OTT */
+  .topbar {
+    background: #000;
+    border-bottom: 3px solid var(--accent);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 18px; }
+  .brand-mark {
+    display: grid;
+    gap: 0;
+    line-height: 0.78;
+    letter-spacing: 0;
+    text-decoration: none;
+  }
+  .brand-mark .claro {
+    color: var(--accent);
+    font-size: 38px;
+    font-weight: 900;
+  }
+  .brand-mark .video {
+    color: #fff;
+    font-size: 31px;
+    font-weight: 850;
+    padding-left: 43px;
+  }
+  .brand-tag {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-left: 1px solid var(--border);
+    padding-left: 14px;
+  }
+  .topbar .right {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .topbar .right .pill {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+    margin-left: 8px;
+  }
+
+  main { padding: 24px 28px; }
+  h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+  p.lead { margin: 0 0 20px; color: var(--muted); font-size: 14px; max-width: 760px; }
+
+  footer {
+    margin-top: 32px;
+    padding: 16px 28px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-align: center;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    gap: 20px;
+    max-width: 1400px;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  video { width: 100%; border-radius: 6px; background: #000; display: block; }
+  h2 { margin: 0 0 12px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .net-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .net-buttons button {
+    flex: 1 1 calc(50% - 4px);
+    background: #21262d;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .net-buttons button:hover { background: #2d333b; border-color: var(--accent); }
+  .net-buttons button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 0 0 2px rgba(218, 41, 28, 0.25);
+  }
+  .net-buttons button:hover { background: #2d333b; border-color: var(--accent); }
+
+  .metrics { display: grid; gap: 10px; }
+  .metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background: #0d1117;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .metric .label { color: var(--muted); }
+  .metric .value { font-family: "JetBrains Mono", "Consolas", monospace; font-weight: 500; }
+
+  .levels { margin-top: 12px; }
+  .level {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--muted);
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+  }
+  .level.active {
+    background: rgba(218, 41, 28, 0.12);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  canvas { width: 100%; height: 140px; display: block; background: #0d1117; border-radius: 4px; }
+  .legend { display: flex; gap: 16px; font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .legend span::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .legend .bw::before { background: #DA291C; }
+  .legend .buf::before { background: var(--good); }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  /* Roadmap section */
+  .roadmap {
+    margin-top: 40px;
+    max-width: 1400px;
+  }
+  .roadmap-header {
+    border-left: 4px solid var(--accent);
+    padding-left: 16px;
+    margin-bottom: 24px;
+  }
+  .roadmap-header .eyebrow {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0 0 6px;
+  }
+  .roadmap-header h2 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    text-transform: none;
+  }
+  .roadmap-header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 760px;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+    position: relative;
+    transition: all 0.2s;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .card:hover::before { transform: scaleX(1); }
+  .card .num {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--border);
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+  .card h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    color: var(--text);
+    font-weight: 600;
+    padding-right: 50px;
+  }
+  .card .impact {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin-bottom: 12px;
+  }
+  .impact.high { background: rgba(218, 41, 28, 0.15); color: #ff6b5e; }
+  .impact.med { background: rgba(210, 153, 34, 0.15); color: #f0c040; }
+  .impact.low { background: rgba(63, 185, 80, 0.12); color: #5fd070; }
+  .card p {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .card .users {
+    font-size: 11px;
+    color: #6f7681;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .card .users b { color: var(--text); font-weight: 500; }
+
+  /* Tabla resumen */
+  .summary-table {
+    margin-top: 32px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  .summary-table h3 {
+    margin: 0 0 16px;
+    font-size: 16px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  table.priority { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.priority th, table.priority td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.priority th {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  table.priority td:first-child { font-weight: 500; color: var(--text); }
+  .stars { letter-spacing: 1px; font-size: 14px; }
+  .stars.high { color: var(--accent); }
+  .stars.med { color: #f0c040; }
+  .stars.low { color: var(--muted); }
+  .badge-cost {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-cost.low { background: rgba(63,185,80,0.15); color: #5fd070; }
+  .badge-cost.med { background: rgba(210,153,34,0.15); color: #f0c040; }
+  .badge-cost.high { background: rgba(218,41,28,0.15); color: #ff6b5e; }
+  tr.current td { background: rgba(218, 41, 28, 0.06); }
+  tr.current td:first-child::after {
+    content: " · MVP actual";
+    color: var(--accent);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-left: 6px;
+  }
+
+  /* CMAF demo */
+  .cmaf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 900px) { .cmaf-grid { grid-template-columns: 1fr; } }
+  .player-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .player-box .head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .player-box .head .label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .player-box .head h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .player-box .head .proto {
+    font-family: "JetBrains Mono", "Consolas", monospace;
+    font-size: 11px;
+    background: rgba(218,41,28,0.15);
+    color: #ff6b5e;
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .player-box .head .proto.dash {
+    background: rgba(63,185,80,0.15);
+    color: #5fd070;
+  }
+  .player-box video { width: 100%; display: block; background: #000; }
+  .player-box .foot {
+    padding: 10px 16px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    border-top: 1px solid var(--border);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .download-feed {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .download-feed h3 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .download-feed p.note {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .feed-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 180px;
+    overflow-y: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+  }
+  .feed-list li {
+    padding: 4px 8px;
+    border-radius: 3px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .feed-list li .who {
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .feed-list li .who.hls { background: rgba(218,41,28,0.2); color: #ff6b5e; }
+  .feed-list li .who.dash { background: rgba(63,185,80,0.2); color: #5fd070; }
+  .feed-list li .who.both { background: rgba(255,255,255,0.15); color: #fff; }
+  .feed-list li.shared {
+    background: rgba(255,200,50,0.08);
+    border-left: 3px solid #f0c040;
+  }
+
+  /* Cross-device */
+  .device-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 900px) { .device-grid { grid-template-columns: 1fr; } }
+  .qr-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+  }
+  .qr-panel h3 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .qr-code {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+    display: inline-block;
+    min-width: 224px;
+    min-height: 224px;
+  }
+  .qr-code img,
+  .qr-code canvas {
+    display: block;
+  }
+  .qr-panel .url {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: var(--text);
+    background: #000;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 12px;
+    user-select: all;
+    word-break: break-all;
+  }
+  .qr-panel .hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+
+  .device-matrix {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px;
+  }
+  .device-matrix table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .device-matrix th {
+    text-align: left;
+    padding: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+  }
+  .device-matrix td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .device-matrix tr:last-child td { border-bottom: none; }
+  .device-matrix td.dev { font-weight: 600; color: var(--text); }
+  .device-matrix td.dev .icon {
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 16px;
+  }
+  .device-matrix .fmt {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .device-matrix .fmt.hls { background: rgba(218,41,28,0.15); color: #ff6b5e; }
+  .device-matrix .fmt.dash { background: rgba(63,185,80,0.15); color: #5fd070; }
+  .device-matrix .fmt.airplay { background: rgba(47,129,247,0.15); color: #6db3ff; }
+  .device-matrix .fmt.native { background: rgba(210,153,34,0.15); color: #f0c040; }
+  .device-matrix td.note {
+    color: var(--muted);
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark" aria-label="Claro video">
+      <span class="claro">Claro</span>
+      <span class="video">video</span>
+    </div>
+    <div class="brand-tag">Engineering · ABR Streaming</div>
+  </div>
+  <div class="right">MVP <span class="pill">Internal</span></div>
+</header>
+
+<main>
+<h1>Adaptive Bitrate Streaming sobre HLS</h1>
+<p class="lead">Prueba de concepto del mecanismo que permite entregar video sin buffering en redes variables &mdash; caso de uso directo para suscriptores de Claro Video en LATAM con condiciones de red heterogeneas. Cambia el throttling y observa como el player ajusta la calidad automaticamente, igual que lo hacen Netflix, YouTube o Prime Video.</p>
+
+<div class="grid">
+  <div class="panel">
+    <video id="video" controls autoplay muted></video>
+    <div style="margin-top: 12px;">
+      <h2>Bitrate medido y buffer en el tiempo</h2>
+      <canvas id="chart" width="800" height="140"></canvas>
+      <div class="legend">
+        <span class="bw">Bandwidth estimado (kbps)</span>
+        <span class="buf">Buffer (s &times; 100)</span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>Simular red</h2>
+      <div class="net-buttons" id="net-buttons">
+        <button data-kbps="0">Sin limite</button>
+        <button data-kbps="10000">Excelente (10 Mbps)</button>
+        <button data-kbps="3500">Buena (3.5 Mbps)</button>
+        <button data-kbps="1500">Media (1.5 Mbps)</button>
+        <button data-kbps="600">Lenta (600 kbps)</button>
+        <button data-kbps="300">Mala (300 kbps)</button>
+      </div>
+      <button id="reset-buf" style="margin-top:10px; width:100%; background:#21262d; color:var(--text); border:1px solid var(--border); padding:10px; border-radius:6px; cursor:pointer; font-size:13px;">
+        Reset buffer (forzar refetch)
+      </button>
+    </div>
+
+    <div class="panel" style="margin-top: 16px;">
+      <h2>Estado en vivo</h2>
+      <div class="metrics">
+        <div class="metric"><span class="label">Calidad actual</span><span class="value" id="m-level">-</span></div>
+        <div class="metric"><span class="label">Resolucion</span><span class="value" id="m-res">-</span></div>
+        <div class="metric"><span class="label">Bitrate del stream</span><span class="value" id="m-bitrate">-</span></div>
+        <div class="metric"><span class="label">Bandwidth estimado</span><span class="value" id="m-bw">-</span></div>
+        <div class="metric"><span class="label">Buffer disponible</span><span class="value" id="m-buf">-</span></div>
+        <div class="metric"><span class="label">Ultimo segmento</span><span class="value" id="m-frag">-</span></div>
+        <div class="metric"><span class="label">Throttling activo</span><span class="value" id="m-throttle">sin limite</span></div>
+      </div>
+      <div class="levels" id="levels"></div>
+    </div>
+  </div>
+</div>
+
+<section class="roadmap">
+  <div class="roadmap-header">
+    <p class="eyebrow">Roadmap tecnico</p>
+    <h2>Como llevamos Claro Video al siguiente nivel</h2>
+    <p>El MVP que acabas de ver demuestra el fundamento del streaming adaptativo. Para alcanzar &mdash; o superar &mdash; la calidad de experiencia de Netflix, YouTube y Prime Video, estas son las 10 capas que las plataformas lideres combinan. Cada una es una palanca que podemos activar de forma independiente.</p>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="num">01</div>
+      <h3>Edge caching en POPs propios</h3>
+      <span class="impact high">Impacto alto</span>
+      <p>El cliente nunca descarga del origen: descarga del nodo CDN mas cercano geograficamente. La diferencia: latencia minima, menos rebuffering, menores costos de transito. Aprovechar la red de Telmex/Claro es una ventaja estructural que ningun competidor tiene en LATAM.</p>
+      <div class="users"><b>Netflix</b> Open Connect dentro de ISPs &middot; <b>Amazon</b> CloudFront &middot; <b>Movistar+</b> POPs Telefonica</div>
+    </div>
+
+    <div class="card">
+      <div class="num">02</div>
+      <h3>Codecs de nueva generacion</h3>
+      <span class="impact high">Impacto alto</span>
+      <p>H.264 es de 2003. AV1 y H.265/HEVC entregan la misma calidad visual con <b>30-50% menos bitrate</b>. Esto se traduce directo en menos consumo de datos para el suscriptor y menos costo de bandwidth para nosotros &mdash; doble win.</p>
+      <div class="users"><b>YouTube</b> AV1 &middot; <b>Netflix</b> AV1 + HEVC &middot; <b>Apple TV+</b> HEVC nativo</div>
+    </div>
+
+    <div class="card">
+      <div class="num">03</div>
+      <h3>Per-title / per-shot encoding</h3>
+      <span class="impact high">Impacto alto</span>
+      <p>En vez de un bitrate fijo por resolucion, se mide la complejidad de cada titulo &mdash;incluso cada escena&mdash; y se elige el bitrate minimo para preservar calidad. Una caricatura plana en 1080p puede verse perfecta a 1.5 Mbps. <b>Ahorra 20-30% del bandwidth</b> sin perdida visual perceptible.</p>
+      <div class="users"><b>Netflix</b> Dynamic Optimizer &middot; <b>Disney+</b> content-aware encoding</div>
+    </div>
+
+    <div class="card">
+      <div class="num">04</div>
+      <h3>Aceleracion por GPU</h3>
+      <span class="impact med">Impacto medio</span>
+      <p>Encodear en GPU (NVENC, Quick Sync) es <b>10-50x mas rapido</b> que en CPU. Reduce el tiempo de procesar el catalogo de dias a horas y baja drasticamente el costo operativo. Decodificacion en hardware del lado cliente garantiza 4K fluido sin quemar bateria.</p>
+      <div class="users"><b>Netflix</b> flotas GPU AWS &middot; <b>YouTube</b> transcoders Argos custom</div>
+    </div>
+
+    <div class="card">
+      <div class="num">05</div>
+      <h3>HTTP/3 y QUIC</h3>
+      <span class="impact med">Impacto medio</span>
+      <p>El protocolo de transporte importa. HTTP/3 sobre QUIC reduce tiempo de inicio de video <b>20-30%</b>, y maneja mejor las redes mobiles con switcheo entre WiFi y celular sin cortar el stream. Critico para usuarios en movimiento.</p>
+      <div class="users"><b>YouTube</b> QUIC desde 2014 &middot; <b>Meta</b> en toda su infra &middot; <b>Cloudflare</b> default</div>
+    </div>
+
+    <div class="card">
+      <div class="num">06</div>
+      <h3>ABR predictivo con ML</h3>
+      <span class="impact med">Impacto medio</span>
+      <p>Los algoritmos clasicos de adaptive bitrate son reactivos. Modelos entrenados con ML predicen el throughput futuro basandose en historial del usuario, hora, dispositivo, ISP y region. Decisiones mas estables, menos oscilaciones de calidad.</p>
+      <div class="users"><b>Netflix</b> reinforcement learning &middot; <b>MIT</b> Pensieve &middot; <b>YouTube</b> BOLA</div>
+    </div>
+
+    <div class="card">
+      <div class="num">07</div>
+      <h3>Just-in-time packaging (CMAF)</h3>
+      <span class="impact med">Impacto medio</span>
+      <p>En vez de pre-generar HLS + DASH + Smooth Streaming + cada DRM por separado &mdash;multiplicando storage&mdash; se guarda un solo CMAF master y se empaqueta al vuelo segun el cliente. <b>Reduce storage 4-5x</b> y simplifica el pipeline.</p>
+      <div class="users"><b>Apple + Microsoft</b> co-disenaron el estandar &middot; <b>Hulu, Disney+</b></div>
+    </div>
+
+    <div class="card">
+      <div class="num">08</div>
+      <h3>Low-Latency HLS para vivo</h3>
+      <span class="impact high">Impacto alto si hay live</span>
+      <p>Para deportes, conciertos y eventos en vivo, reduce la latencia extremo a extremo de 30s a <b>2-3 segundos</b>. Critico para retransmision de futbol y eventos donde el spoiler en redes sociales arruina la experiencia.</p>
+      <div class="users"><b>Apple</b> creo el estandar &middot; <b>Twitch</b> &middot; <b>DAZN</b> live sports &middot; <b>ESPN+</b></div>
+    </div>
+
+    <div class="card">
+      <div class="num">09</div>
+      <h3>Pre-fetching predictivo</h3>
+      <span class="impact low">Impacto bajo</span>
+      <p>Cuando el usuario esta cerca de terminar un episodio, se pre-cachea el primer segmento del siguiente. Resultado: <b>auto-play instantaneo sin pantalla negra</b>. Pequenos detalles que acumulados marcan la sensacion de plataforma premium.</p>
+      <div class="users"><b>Netflix</b> &middot; <b>Disney+</b> &middot; <b>YouTube</b> Up Next</div>
+    </div>
+
+    <div class="card">
+      <div class="num">10</div>
+      <h3>Multi-DRM y multi-CDN</h3>
+      <span class="impact med">Impacto medio</span>
+      <p>Soporte simultaneo de Widevine (Google/Android), PlayReady (Microsoft/Smart TV), FairPlay (Apple). Multi-CDN con failover automatico: si un CDN falla en una region, el cliente switchea al alternativo en <b>menos de 1 segundo</b>. Resiliencia operativa y compatibilidad universal de dispositivos.</p>
+      <div class="users"><b>Disney+</b> 3 CDNs paralelos &middot; <b>HBO Max</b> &middot; <b>Paramount+</b></div>
+    </div>
+
+  </div>
+
+  <div class="summary-table">
+    <h3>Priorizacion sugerida (impacto vs costo)</h3>
+    <table class="priority">
+      <thead>
+        <tr>
+          <th>Iniciativa</th>
+          <th>Impacto</th>
+          <th>Costo</th>
+          <th>Justificacion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="current">
+          <td>ABR adaptativo cliente</td>
+          <td><span class="stars med">&#9733;&#9733;&#9733;</span></td>
+          <td><span class="badge-cost low">Bajo</span></td>
+          <td>Mejora UX percibida inmediata. Sin cambios de infra.</td>
+        </tr>
+        <tr>
+          <td>Edge caching en POPs Telmex</td>
+          <td><span class="stars high">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
+          <td><span class="badge-cost med">Medio</span></td>
+          <td>Reduce costo de transito y latencia. Ventaja unica vs competencia.</td>
+        </tr>
+        <tr>
+          <td>Encoding HEVC + AV1</td>
+          <td><span class="stars high">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
+          <td><span class="badge-cost high">Alto</span></td>
+          <td>Requiere re-procesar catalogo. Recupera inversion en bandwidth.</td>
+        </tr>
+        <tr>
+          <td>Per-title encoding</td>
+          <td><span class="stars high">&#9733;&#9733;&#9733;&#9733;</span></td>
+          <td><span class="badge-cost med">Medio</span></td>
+          <td>-25% bandwidth promedio sin cambio de codec.</td>
+        </tr>
+        <tr>
+          <td>HTTP/3 (QUIC)</td>
+          <td><span class="stars med">&#9733;&#9733;&#9733;</span></td>
+          <td><span class="badge-cost low">Bajo</span></td>
+          <td>Mejora dramatica en redes mobile. CDN modernos lo soportan.</td>
+        </tr>
+        <tr>
+          <td>GPU encoding pipeline</td>
+          <td><span class="stars med">&#9733;&#9733;&#9733;</span></td>
+          <td><span class="badge-cost med">Medio</span></td>
+          <td>Costos operativos -10x. Habilita re-encoding del catalogo.</td>
+        </tr>
+        <tr>
+          <td>Low-Latency HLS</td>
+          <td><span class="stars high">&#9733;&#9733;&#9733;&#9733;</span></td>
+          <td><span class="badge-cost med">Medio</span></td>
+          <td>Solo si hay contenido en vivo (deportes, eventos).</td>
+        </tr>
+        <tr>
+          <td>ML-based ABR</td>
+          <td><span class="stars med">&#9733;&#9733;</span></td>
+          <td><span class="badge-cost high">Alto</span></td>
+          <td>Optimizacion fina. Requiere datos historicos y MLOps.</td>
+        </tr>
+        <tr>
+          <td>CMAF + JIT packaging</td>
+          <td><span class="stars med">&#9733;&#9733;&#9733;</span></td>
+          <td><span class="badge-cost med">Medio</span></td>
+          <td>Storage -75%. Simplifica el pipeline de empaquetado.</td>
+        </tr>
+        <tr>
+          <td>Pre-fetching + Multi-DRM/CDN</td>
+          <td><span class="stars med">&#9733;&#9733;</span></td>
+          <td><span class="badge-cost low">Bajo a Medio</span></td>
+          <td>Resiliencia operativa y pulido de experiencia premium.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="roadmap" id="cmaf">
+  <div class="roadmap-header">
+    <p class="eyebrow">CMAF en accion</p>
+    <h2>Un solo archivo binario, todos los dispositivos</h2>
+    <p>Los dos players de abajo reproducen el mismo video, pero uno consume un manifiesto <b>HLS</b> (estandar de Apple) y el otro un manifiesto <b>DASH</b> (estandar abierto que usa Google y Microsoft). Ambos players estan descargando exactamente los <b>mismos archivos <code style="color:#f0c040">.m4s</code></b> del servidor &mdash; es lo que permite que Claro Video sirva un solo storage para iPhone, Android, Smart TVs y consolas.</p>
+  </div>
+
+  <div class="cmaf-grid">
+    <div class="player-box">
+      <div class="head">
+        <div class="label">
+          <h4>Apple stack</h4>
+          <span class="proto">HLS &middot; hls.js</span>
+        </div>
+        <small style="color:var(--muted); font-size:11px;">iPhone, iPad, Apple TV, Safari</small>
+      </div>
+      <video id="cmaf-hls" controls muted></video>
+      <div class="foot" id="cmaf-hls-foot">cargando manifest.m3u8...</div>
+    </div>
+
+    <div class="player-box">
+      <div class="head">
+        <div class="label">
+          <h4>Google / Microsoft stack</h4>
+          <span class="proto dash">DASH &middot; dash.js</span>
+        </div>
+        <small style="color:var(--muted); font-size:11px;">Android, Chrome, Edge, Xbox</small>
+      </div>
+      <video id="cmaf-dash" controls muted></video>
+      <div class="foot" id="cmaf-dash-foot">cargando manifest.mpd...</div>
+    </div>
+  </div>
+
+  <div class="download-feed">
+    <h3>Archivos descargados en vivo</h3>
+    <p class="note">Los segmentos resaltados en <b style="color:#f0c040">amarillo</b> son archivos que ambos players descargaron &mdash; misma URL, mismos bytes en el CDN. Eso es el cache hit gigante que CMAF habilita.</p>
+    <ul class="feed-list" id="feed-list">
+      <li style="color:var(--muted)">Esperando descargas...</li>
+    </ul>
+  </div>
+
+  <div class="summary-table">
+    <h3>Impacto en storage</h3>
+    <table class="priority">
+      <thead>
+        <tr>
+          <th>Configuracion</th>
+          <th>Versiones por titulo</th>
+          <th>Storage relativo</th>
+          <th>Cache hit en CDN</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Pipeline tradicional (HLS .ts + DASH .m4s + Smooth)</td>
+          <td>4 calidades x 3 formatos = <b>12</b></td>
+          <td><span class="badge-cost high">100%</span></td>
+          <td>Bajo (URLs distintas por formato)</td>
+        </tr>
+        <tr>
+          <td>Pipeline + multi-DRM separado</td>
+          <td>12 x 3 DRMs = <b>36</b></td>
+          <td><span class="badge-cost high">~300%</span></td>
+          <td>Muy bajo</td>
+        </tr>
+        <tr class="current">
+          <td>CMAF + JIT packaging (este demo)</td>
+          <td>4 calidades, <b>1</b> formato</td>
+          <td><span class="badge-cost low">~25%</span></td>
+          <td>Alto (todos consumen los mismos .m4s)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="roadmap" id="cross-device">
+  <div class="roadmap-header">
+    <p class="eyebrow">Cross-device demo</p>
+    <h2>La misma URL funciona en cualquier pantalla</h2>
+    <p>Escanea el QR desde tu celular, abre el navegador de tu Smart TV o consola y entra a la URL. Cada dispositivo escogera el formato que prefiere &mdash; <b>tu no programaste nada distinto para cada uno</b>. Esa es la promesa operativa de CMAF + ABR para Claro Video: un solo backend, todas las pantallas.</p>
+  </div>
+
+  <div class="device-grid">
+    <div class="qr-panel">
+      <h3>Escanea para ver en otro dispositivo</h3>
+      <div id="qr" class="qr-code" aria-label="Codigo QR de la URL LAN"></div>
+      <div class="url" id="lan-url">cargando...</div>
+      <p class="hint">Apunta la camara del celular o pega la URL en el navegador de tu TV / Xbox. Todos deben estar en la misma red WiFi.</p>
+    </div>
+
+    <div class="device-matrix">
+      <table>
+        <thead>
+          <tr>
+            <th>Dispositivo</th>
+            <th>Como llegar</th>
+            <th>Formato</th>
+            <th>Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="dev">iPhone / iPad</td>
+            <td class="note">Camara &rarr; escanea QR &rarr; abre en Safari</td>
+            <td><span class="fmt hls">HLS</span> <span class="fmt native">nativo</span></td>
+            <td class="note">Safari reproduce HLS sin libreria.</td>
+          </tr>
+          <tr>
+            <td class="dev">Android</td>
+            <td class="note">Camara &rarr; escanea QR &rarr; abre en Chrome</td>
+            <td><span class="fmt dash">DASH</span></td>
+            <td class="note">Chrome usa Media Source Extensions.</td>
+          </tr>
+          <tr>
+            <td class="dev">Samsung TV (Tizen)</td>
+            <td class="note">Abre Samsung Internet &rarr; escribe la URL</td>
+            <td><span class="fmt hls">HLS</span> o <span class="fmt dash">DASH</span></td>
+            <td class="note">Reproductor MSE integrado al WebKit de Tizen.</td>
+          </tr>
+          <tr>
+            <td class="dev">LG TV (webOS)</td>
+            <td class="note">Abre LG Browser &rarr; escribe la URL</td>
+            <td><span class="fmt hls">HLS</span> o <span class="fmt dash">DASH</span></td>
+            <td class="note">webOS soporta HTML5 video con MSE.</td>
+          </tr>
+          <tr>
+            <td class="dev">Xbox One / Series</td>
+            <td class="note">Abre Edge &rarr; escribe la URL</td>
+            <td><span class="fmt dash">DASH</span></td>
+            <td class="note">Edge en Xbox es Chromium-based, soporte completo.</td>
+          </tr>
+          <tr>
+            <td class="dev">Apple TV</td>
+            <td class="note">AirPlay desde iPhone/Mac apuntando al demo</td>
+            <td><span class="fmt airplay">AirPlay</span></td>
+            <td class="note">tvOS no tiene browser web; AirPlay reenvia el HLS.</td>
+          </tr>
+          <tr>
+            <td class="dev">Roku / FireTV</td>
+            <td class="note">Requiere channel app nativa (BrightScript / Lambda)</td>
+            <td><span class="fmt hls">HLS</span> <span class="fmt dash">DASH</span></td>
+            <td class="note">No tienen browser, pero los SDKs nativos consumen lo mismo.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>Hitss &middot; Claro Video Engineering &middot; Demo interno</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STATIC_PAGE_URL = window.location.href.split('#')[0];
+const video = document.getElementById('video');
+const levelsEl = document.getElementById('levels');
+const chart = document.getElementById('chart');
+const ctx = chart.getContext('2d');
+
+const m = {
+  level: document.getElementById('m-level'),
+  res: document.getElementById('m-res'),
+  bitrate: document.getElementById('m-bitrate'),
+  bw: document.getElementById('m-bw'),
+  buf: document.getElementById('m-buf'),
+  frag: document.getElementById('m-frag'),
+  throttle: document.getElementById('m-throttle'),
+};
+
+const history = []; // {t, bw, buf}
+const MAX_POINTS = 120;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+async function setThrottle(kbps) {
+  try {
+    const r = await fetch('api/throttle?kbps=' + kbps, { method: 'POST' });
+    if (!r.ok) throw new Error('throttle api unavailable');
+    const j = await r.json();
+    m.throttle.textContent = j.kbps === 0 ? 'sin limite' : (j.kbps + ' kbps');
+    document.querySelectorAll('#net-buttons button').forEach(b => {
+      b.classList.toggle('active', Number(b.dataset.kbps) === j.kbps);
+    });
+    showToast('Red: ' + (j.kbps === 0 ? 'sin limite' : j.kbps + ' kbps'));
+  } catch {
+    m.throttle.textContent = 'estatico (GitHub Pages)';
+    showToast('Throttling disponible solo con server.py local');
+  }
+}
+
+document.querySelectorAll('#net-buttons button').forEach(btn => {
+  btn.addEventListener('click', () => setThrottle(Number(btn.dataset.kbps)));
+});
+
+document.getElementById('reset-buf').addEventListener('click', () => {
+  if (!window._hls) return;
+  window._hls.trigger(Hls.Events.BUFFER_FLUSHING, {
+    startOffset: 0, endOffset: Number.POSITIVE_INFINITY, type: null
+  });
+  const t = video.currentTime;
+  video.currentTime = Math.max(0, t - 0.001);
+  showToast('Buffer reseteado');
+});
+
+if (Hls.isSupported()) {
+  const hls = new Hls({
+    // Config pensada para que el ABR sea VISIBLE en un video corto:
+    // buffer pequeno -> hls.js debe seguir descargando -> remide bandwidth
+    // -> sube/baja de calidad rapido segun la red.
+    startLevel: 0,
+    abrEwmaDefaultEstimate: 500000,
+    abrBandWidthFactor: 0.95,
+    abrBandWidthUpFactor: 0.9,
+    maxBufferLength: 8,         // solo 8s adelantados (default es 30)
+    maxMaxBufferLength: 12,
+    backBufferLength: 4,
+  });
+  window._hls = hls;
+  hls.loadSource('stream/master.m3u8');
+  hls.attachMedia(video);
+
+  hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+    levelsEl.innerHTML = '';
+    data.levels.forEach((lv, i) => {
+      const el = document.createElement('div');
+      el.className = 'level';
+      el.dataset.idx = i;
+      el.innerHTML = `<span>${lv.height}p</span><span>${Math.round(lv.bitrate / 1000)} kbps</span>`;
+      levelsEl.appendChild(el);
+    });
+  });
+
+  function refreshActive(idx) {
+    document.querySelectorAll('.level').forEach(el => {
+      el.classList.toggle('active', Number(el.dataset.idx) === idx);
+    });
+  }
+
+  hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
+    const lv = hls.levels[data.level];
+    if (!lv) return;
+    m.level.textContent = lv.height + 'p (nivel ' + data.level + ')';
+    m.res.textContent = lv.width + ' x ' + lv.height;
+    m.bitrate.textContent = Math.round(lv.bitrate / 1000) + ' kbps';
+    refreshActive(data.level);
+  });
+
+  hls.on(Hls.Events.FRAG_LOADED, (_, data) => {
+    const f = data.frag;
+    const stats = data.stats || f.stats;
+    const dur = (stats.loading.end - stats.loading.start) / 1000;
+    const kb = (stats.total * 8) / 1000;
+    const kbps = dur > 0 ? Math.round(kb / dur) : 0;
+    m.frag.textContent = f.relurl + ' (' + Math.round(stats.total / 1024) + ' KB en ' + dur.toFixed(2) + 's)';
+    const bw = Math.round(hls.bandwidthEstimate / 1000);
+    m.bw.textContent = bw + ' kbps';
+    pushPoint(bw);
+  });
+
+  function pushPoint(bw) {
+    let buf = 0;
+    if (video.buffered.length) {
+      buf = video.buffered.end(video.buffered.length - 1) - video.currentTime;
+    }
+    m.buf.textContent = buf.toFixed(1) + ' s';
+    history.push({ bw, buf });
+    if (history.length > MAX_POINTS) history.shift();
+    drawChart();
+  }
+
+  setInterval(() => {
+    if (video.buffered.length) {
+      const buf = video.buffered.end(video.buffered.length - 1) - video.currentTime;
+      m.buf.textContent = Math.max(0, buf).toFixed(1) + ' s';
+    }
+  }, 500);
+
+  function drawChart() {
+    const w = chart.width = chart.clientWidth * devicePixelRatio;
+    const h = chart.height = 140 * devicePixelRatio;
+    ctx.clearRect(0, 0, w, h);
+    if (history.length < 2) return;
+    const maxBw = Math.max(1000, ...history.map(p => p.bw));
+    const stepX = w / (MAX_POINTS - 1);
+
+    // Bandwidth
+    ctx.strokeStyle = '#DA291C';
+    ctx.lineWidth = 2 * devicePixelRatio;
+    ctx.beginPath();
+    history.forEach((p, i) => {
+      const x = i * stepX;
+      const y = h - (p.bw / maxBw) * (h - 10) - 5;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Buffer (en seg, escalado x100 para visibilidad)
+    ctx.strokeStyle = '#3fb950';
+    ctx.beginPath();
+    history.forEach((p, i) => {
+      const x = i * stepX;
+      const v = Math.min(1, (p.buf * 100) / maxBw);
+      const y = h - v * (h - 10) - 5;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+}
+
+fetch('api/throttle').then(r => {
+  if (!r.ok) throw new Error('throttle api unavailable');
+  return r.json();
+}).then(j => {
+  m.throttle.textContent = j.kbps === 0 ? 'sin limite' : (j.kbps + ' kbps');
+  document.querySelectorAll('#net-buttons button').forEach(b => {
+    b.classList.toggle('active', Number(b.dataset.kbps) === j.kbps);
+  });
+}).catch(() => {
+  m.throttle.textContent = 'estatico (GitHub Pages)';
+});
+
+// =====================================================================
+// CMAF demo: dos players en paralelo (HLS + DASH) sobre los mismos .m4s
+// =====================================================================
+
+const CMAF_HLS_URL  = 'stream-cmaf/master.m3u8';
+const CMAF_DASH_URL = 'stream-cmaf/manifest.mpd';
+
+const cmafFootHls  = document.getElementById('cmaf-hls-foot');
+const cmafFootDash = document.getElementById('cmaf-dash-foot');
+const feedList     = document.getElementById('feed-list');
+
+// Tracking de archivos descargados por cada player
+const downloadsByFile = new Map(); // filename -> Set<'hls'|'dash'>
+
+function logDownload(who, url) {
+  const file = url.split('/').slice(-2).join('/'); // ej "720p/seg_00010.m4s"
+  if (!downloadsByFile.has(file)) downloadsByFile.set(file, new Set());
+  downloadsByFile.get(file).add(who);
+  renderFeed();
+}
+
+function renderFeed() {
+  // ordena: compartidos primero, despues por nombre
+  const entries = Array.from(downloadsByFile.entries()).sort((a, b) => {
+    const aShared = a[1].size > 1 ? 0 : 1;
+    const bShared = b[1].size > 1 ? 0 : 1;
+    if (aShared !== bShared) return aShared - bShared;
+    return a[0].localeCompare(b[0]);
+  }).slice(0, 30);
+
+  if (!entries.length) return;
+
+  feedList.innerHTML = '';
+  for (const [file, who] of entries) {
+    const li = document.createElement('li');
+    const shared = who.size > 1;
+    if (shared) li.classList.add('shared');
+    let label;
+    if (shared) label = '<span class="who both">HLS + DASH</span>';
+    else if (who.has('hls')) label = '<span class="who hls">HLS</span>';
+    else label = '<span class="who dash">DASH</span>';
+    li.innerHTML = `${label}<code style="color:${shared ? '#f0c040' : 'var(--muted)'}">${file}</code>`;
+    feedList.appendChild(li);
+  }
+}
+
+// --- Player HLS (lado Apple) ---
+const cmafHlsVideo = document.getElementById('cmaf-hls');
+if (Hls.isSupported()) {
+  const hlsCmaf = new Hls({
+    maxBufferLength: 8,
+    capLevelToPlayerSize: false,
+    startLevel: 2
+  });
+  hlsCmaf.loadSource(CMAF_HLS_URL);
+  hlsCmaf.attachMedia(cmafHlsVideo);
+  hlsCmaf.on(Hls.Events.MANIFEST_PARSED, () => {
+    const topLevel = hlsCmaf.levels.length - 1;
+    hlsCmaf.currentLevel = topLevel;
+    hlsCmaf.loadLevel = topLevel;
+    hlsCmaf.nextLevel = topLevel;
+    cmafFootHls.textContent = '1080p fijo para demostrar CMAF compartido';
+  });
+  hlsCmaf.on(Hls.Events.FRAG_LOADED, (_, data) => {
+    const url = data.frag.url;
+    cmafFootHls.textContent = '.m4s recien descargado: ' + url.split('/').slice(-2).join('/');
+    logDownload('hls', url);
+  });
+} else if (cmafHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
+  cmafHlsVideo.src = CMAF_HLS_URL;
+  cmafFootHls.textContent = 'HLS reproducido nativamente (Safari)';
+}
+
+// --- Player DASH (lado Google/Microsoft) ---
+const cmafDashVideo = document.getElementById('cmaf-dash');
+const dashPlayer = dashjs.MediaPlayer().create();
+dashPlayer.updateSettings({
+  streaming: {
+    abr: { autoSwitchBitrate: { video: false } },
+    buffer: { bufferTimeAtTopQuality: 8 }
+  }
+});
+dashPlayer.initialize(cmafDashVideo, CMAF_DASH_URL, false);
+dashPlayer.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
+  const qualities = dashPlayer.getBitrateInfoListFor('video') || [];
+  const topQuality = Math.max(0, qualities.length - 1);
+  dashPlayer.setQualityFor('video', topQuality, true);
+  cmafFootDash.textContent = '1080p fijo para demostrar CMAF compartido';
+});
+dashPlayer.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => {
+  if (!e.request || !e.request.url) return;
+  const url = e.request.url;
+  if (!url.endsWith('.m4s') && !url.endsWith('.mp4')) return;
+  cmafFootDash.textContent = '.m4s recien descargado: ' + url.split('/').slice(-2).join('/');
+  logDownload('dash', url);
+});
+
+// =====================================================================
+// Cross-device: QR + URL LAN
+// =====================================================================
+
+function renderQr(url) {
+  document.getElementById('lan-url').textContent = url;
+  const qrEl = document.getElementById('qr');
+  qrEl.innerHTML = '';
+
+  if (typeof QRCode !== 'undefined') {
+    new QRCode(qrEl, {
+      text: url,
+      width: 200,
+      height: 200,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else {
+    qrEl.textContent = 'QR no disponible';
+  }
+}
+
+fetch('api/info').then(r => {
+  if (!r.ok) throw new Error('info api unavailable');
+  return r.json();
+}).then(info => {
+  renderQr(info.lan_url);
+}).catch(() => {
+  renderQr(STATIC_PAGE_URL);
+});
+</script>
+</body>
+</html>

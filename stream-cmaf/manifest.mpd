@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='utf-8'?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT122.155S" minBufferTime="PT2.0S" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011">
+  <Period start="PT0.0S">
+    <AdaptationSet mimeType="video/mp4" contentType="video" segmentAlignment="true" startWithSAP="1">
+      <Representation id="480p" codecs="avc1.4d4028" bandwidth="1200000" width="854" height="480" frameRate="30000/1001">
+        <SegmentList timescale="1000" duration="4000">
+          <Initialization sourceURL="480p/init_0.mp4" />
+          <SegmentURL media="480p/seg_00000.m4s" />
+          <SegmentURL media="480p/seg_00001.m4s" />
+          <SegmentURL media="480p/seg_00002.m4s" />
+          <SegmentURL media="480p/seg_00003.m4s" />
+          <SegmentURL media="480p/seg_00004.m4s" />
+          <SegmentURL media="480p/seg_00005.m4s" />
+          <SegmentURL media="480p/seg_00006.m4s" />
+          <SegmentURL media="480p/seg_00007.m4s" />
+          <SegmentURL media="480p/seg_00008.m4s" />
+          <SegmentURL media="480p/seg_00009.m4s" />
+          <SegmentURL media="480p/seg_00010.m4s" />
+          <SegmentURL media="480p/seg_00011.m4s" />
+          <SegmentURL media="480p/seg_00012.m4s" />
+          <SegmentURL media="480p/seg_00013.m4s" />
+          <SegmentURL media="480p/seg_00014.m4s" />
+          <SegmentURL media="480p/seg_00015.m4s" />
+          <SegmentURL media="480p/seg_00016.m4s" />
+          <SegmentURL media="480p/seg_00017.m4s" />
+          <SegmentURL media="480p/seg_00018.m4s" />
+          <SegmentURL media="480p/seg_00019.m4s" />
+          <SegmentURL media="480p/seg_00020.m4s" />
+          <SegmentURL media="480p/seg_00021.m4s" />
+          <SegmentURL media="480p/seg_00022.m4s" />
+          <SegmentURL media="480p/seg_00023.m4s" />
+          <SegmentURL media="480p/seg_00024.m4s" />
+          <SegmentURL media="480p/seg_00025.m4s" />
+          <SegmentURL media="480p/seg_00026.m4s" />
+          <SegmentURL media="480p/seg_00027.m4s" />
+          <SegmentURL media="480p/seg_00028.m4s" />
+          <SegmentURL media="480p/seg_00029.m4s" />
+          <SegmentURL media="480p/seg_00030.m4s" />
+        </SegmentList>
+      </Representation>
+      <Representation id="720p" codecs="avc1.4d4028" bandwidth="2800000" width="1280" height="720" frameRate="30000/1001">
+        <SegmentList timescale="1000" duration="4000">
+          <Initialization sourceURL="720p/init_1.mp4" />
+          <SegmentURL media="720p/seg_00000.m4s" />
+          <SegmentURL media="720p/seg_00001.m4s" />
+          <SegmentURL media="720p/seg_00002.m4s" />
+          <SegmentURL media="720p/seg_00003.m4s" />
+          <SegmentURL media="720p/seg_00004.m4s" />
+          <SegmentURL media="720p/seg_00005.m4s" />
+          <SegmentURL media="720p/seg_00006.m4s" />
+          <SegmentURL media="720p/seg_00007.m4s" />
+          <SegmentURL media="720p/seg_00008.m4s" />
+          <SegmentURL media="720p/seg_00009.m4s" />
+          <SegmentURL media="720p/seg_00010.m4s" />
+          <SegmentURL media="720p/seg_00011.m4s" />
+          <SegmentURL media="720p/seg_00012.m4s" />
+          <SegmentURL media="720p/seg_00013.m4s" />
+          <SegmentURL media="720p/seg_00014.m4s" />
+          <SegmentURL media="720p/seg_00015.m4s" />
+          <SegmentURL media="720p/seg_00016.m4s" />
+          <SegmentURL media="720p/seg_00017.m4s" />
+          <SegmentURL media="720p/seg_00018.m4s" />
+          <SegmentURL media="720p/seg_00019.m4s" />
+          <SegmentURL media="720p/seg_00020.m4s" />
+          <SegmentURL media="720p/seg_00021.m4s" />
+          <SegmentURL media="720p/seg_00022.m4s" />
+          <SegmentURL media="720p/seg_00023.m4s" />
+          <SegmentURL media="720p/seg_00024.m4s" />
+          <SegmentURL media="720p/seg_00025.m4s" />
+          <SegmentURL media="720p/seg_00026.m4s" />
+          <SegmentURL media="720p/seg_00027.m4s" />
+          <SegmentURL media="720p/seg_00028.m4s" />
+          <SegmentURL media="720p/seg_00029.m4s" />
+          <SegmentURL media="720p/seg_00030.m4s" />
+        </SegmentList>
+      </Representation>
+      <Representation id="1080p" codecs="avc1.4d4028" bandwidth="5000000" width="1920" height="1080" frameRate="30000/1001">
+        <SegmentList timescale="1000" duration="4000">
+          <Initialization sourceURL="1080p/init_2.mp4" />
+          <SegmentURL media="1080p/seg_00000.m4s" />
+          <SegmentURL media="1080p/seg_00001.m4s" />
+          <SegmentURL media="1080p/seg_00002.m4s" />
+          <SegmentURL media="1080p/seg_00003.m4s" />
+          <SegmentURL media="1080p/seg_00004.m4s" />
+          <SegmentURL media="1080p/seg_00005.m4s" />
+          <SegmentURL media="1080p/seg_00006.m4s" />
+          <SegmentURL media="1080p/seg_00007.m4s" />
+          <SegmentURL media="1080p/seg_00008.m4s" />
+          <SegmentURL media="1080p/seg_00009.m4s" />
+          <SegmentURL media="1080p/seg_00010.m4s" />
+          <SegmentURL media="1080p/seg_00011.m4s" />
+          <SegmentURL media="1080p/seg_00012.m4s" />
+          <SegmentURL media="1080p/seg_00013.m4s" />
+          <SegmentURL media="1080p/seg_00014.m4s" />
+          <SegmentURL media="1080p/seg_00015.m4s" />
+          <SegmentURL media="1080p/seg_00016.m4s" />
+          <SegmentURL media="1080p/seg_00017.m4s" />
+          <SegmentURL media="1080p/seg_00018.m4s" />
+          <SegmentURL media="1080p/seg_00019.m4s" />
+          <SegmentURL media="1080p/seg_00020.m4s" />
+          <SegmentURL media="1080p/seg_00021.m4s" />
+          <SegmentURL media="1080p/seg_00022.m4s" />
+          <SegmentURL media="1080p/seg_00023.m4s" />
+          <SegmentURL media="1080p/seg_00024.m4s" />
+          <SegmentURL media="1080p/seg_00025.m4s" />
+          <SegmentURL media="1080p/seg_00026.m4s" />
+          <SegmentURL media="1080p/seg_00027.m4s" />
+          <SegmentURL media="1080p/seg_00028.m4s" />
+          <SegmentURL media="1080p/seg_00029.m4s" />
+          <SegmentURL media="1080p/seg_00030.m4s" />
+        </SegmentList>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>
