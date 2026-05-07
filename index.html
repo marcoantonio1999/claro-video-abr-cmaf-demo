@@ -1729,7 +1729,7 @@ dashPlayer.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => {
 // =====================================================================
 
 function renderQr(url) {
-  const targetUrl = url.split('#')[0] + '#cmaf';
+  const targetUrl = new URL('watch.html', url.split('#')[0]).href;
   document.getElementById('lan-url').textContent = targetUrl;
   const qrEl = document.getElementById('qr');
   qrEl.innerHTML = '';
