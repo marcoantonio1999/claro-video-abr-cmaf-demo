@@ -173,6 +173,208 @@
   .legend .bw::before { background: #DA291C; }
   .legend .buf::before { background: var(--good); }
 
+  /* Experience demo modules */
+  .experience-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.75fr);
+    gap: 16px;
+    margin-top: 16px;
+    max-width: 1400px;
+  }
+  @media (max-width: 1000px) { .experience-grid { grid-template-columns: 1fr; } }
+  .demo-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+  .demo-panel h3 {
+    margin: 0 0 6px;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 650;
+  }
+  .demo-panel p {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .failure-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .failure-buttons button,
+  .compare-controls button {
+    background: #21262d;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    text-align: left;
+  }
+  .failure-buttons button:hover,
+  .compare-controls button:hover { border-color: var(--accent); background: #2d333b; }
+  .failure-buttons button.active {
+    background: rgba(218, 41, 28, 0.18);
+    border-color: var(--accent);
+  }
+  .failure-buttons button b { display: block; margin-bottom: 3px; }
+  .failure-buttons button span { color: var(--muted); font-size: 11px; }
+  .profile-status {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: #0d1117;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .profile-status b { color: var(--text); }
+  .profile-status span { color: var(--muted); }
+
+  .qoe-wrap {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+  @media (max-width: 640px) { .qoe-wrap { grid-template-columns: 1fr; } }
+  .qoe-score {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(circle at center, var(--panel) 58%, transparent 59%),
+      conic-gradient(var(--good) 0deg, var(--good) calc(var(--score, 92) * 3.6deg), #30363d 0deg);
+    border: 1px solid var(--border);
+  }
+  .qoe-score strong {
+    font-size: 36px;
+    line-height: 1;
+  }
+  .qoe-score span {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .qoe-state {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    width: 140px;
+  }
+  .qoe-metrics {
+    display: grid;
+    gap: 8px;
+  }
+  .qoe-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 70px;
+    gap: 10px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .qoe-row .name { color: var(--muted); }
+  .qoe-row .bar {
+    height: 7px;
+    background: #0d1117;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .qoe-row .bar span {
+    display: block;
+    height: 100%;
+    width: var(--w, 90%);
+    background: var(--good);
+  }
+  .qoe-row .value {
+    font-family: "JetBrains Mono", "Consolas", monospace;
+    text-align: right;
+  }
+
+  .compare-section {
+    margin-top: 16px;
+    max-width: 1400px;
+  }
+  .compare-stage {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    --split: 50%;
+  }
+  .compare-stage video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+  }
+  .compare-stage .compare-high {
+    clip-path: inset(0 calc(100% - var(--split)) 0 0);
+  }
+  .compare-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--split);
+    width: 2px;
+    background: #fff;
+    box-shadow: 0 0 12px rgba(0,0,0,0.8);
+    pointer-events: none;
+  }
+  .compare-divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 34px;
+    height: 34px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: rgba(0,0,0,0.55);
+  }
+  .compare-label {
+    position: absolute;
+    top: 12px;
+    padding: 5px 9px;
+    border-radius: 4px;
+    background: rgba(0,0,0,0.68);
+    border: 1px solid rgba(255,255,255,0.18);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .compare-label.low { right: 12px; color: #f0c040; }
+  .compare-label.high { left: 12px; color: #5fd070; }
+  .compare-slider {
+    width: 100%;
+    margin-top: 12px;
+    accent-color: var(--accent);
+  }
+  .compare-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
   .toast {
     position: fixed;
     bottom: 20px;
@@ -623,6 +825,68 @@
   </div>
 </div>
 
+<section class="roadmap" id="experience-lab">
+  <div class="roadmap-header">
+    <p class="eyebrow">Experience lab</p>
+    <h2>Calidad percibida bajo condiciones reales</h2>
+    <p>Esta capa muestra lo que normalmente no se ve en una demo comercial: como responde el player ante fallas de red, que tan saludable es la sesion y que diferencia visual hay entre calidades. Es material directo para explicar QoE, soporte y retencion.</p>
+  </div>
+
+  <div class="experience-grid">
+    <div class="demo-panel">
+      <h3>Falla de red controlada</h3>
+      <p>Ejecuta perfiles de red que cambian el throttling en vivo. El video principal debe bajar/subir calidad mientras el buffer y el score QoE reaccionan.</p>
+      <div class="failure-buttons" id="failure-buttons">
+        <button data-profile="metro"><b>Metro / movilidad</b><span>picos buenos, caidas bruscas y recuperacion</span></button>
+        <button data-profile="wifi"><b>WiFi saturado</b><span>red compartida con throughput inestable</span></button>
+        <button data-profile="mobile"><b>4G inestable</b><span>oscilacion agresiva entre 300 kbps y 3.5 Mbps</span></button>
+        <button data-profile="fiber"><b>Fibra estable</b><span>10 Mbps sostenidos para recuperacion premium</span></button>
+      </div>
+      <div class="profile-status">
+        <b id="profile-name">Perfil manual</b>
+        <span id="profile-step">Usa los botones para iniciar una simulacion</span>
+      </div>
+    </div>
+
+    <div class="demo-panel">
+      <h3>QoE score en vivo</h3>
+      <p>Score compuesto por arranque, buffer, cambios de calidad, rebuffering y bitrate efectivo. Traduce telemetria tecnica a experiencia de usuario.</p>
+      <div class="qoe-wrap">
+        <div>
+          <div class="qoe-score" id="qoe-score-ring" style="--score:92">
+            <div><strong id="qoe-score">92</strong><span>QoE</span></div>
+          </div>
+          <div class="qoe-state" id="qoe-state">Experiencia saludable</div>
+        </div>
+        <div class="qoe-metrics">
+          <div class="qoe-row"><span class="name">Arranque</span><span class="bar"><span id="qoe-startup-bar"></span></span><span class="value" id="qoe-startup">0.0s</span></div>
+          <div class="qoe-row"><span class="name">Buffer</span><span class="bar"><span id="qoe-buffer-bar"></span></span><span class="value" id="qoe-buffer">0.0s</span></div>
+          <div class="qoe-row"><span class="name">Rebuffer</span><span class="bar"><span id="qoe-stall-bar"></span></span><span class="value" id="qoe-stall">0</span></div>
+          <div class="qoe-row"><span class="name">Switches</span><span class="bar"><span id="qoe-switch-bar"></span></span><span class="value" id="qoe-switch">0</span></div>
+          <div class="qoe-row"><span class="name">Bitrate</span><span class="bar"><span id="qoe-bitrate-bar"></span></span><span class="value" id="qoe-bitrate">-</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-panel compare-section">
+    <h3>Comparador visual 480p vs 1080p</h3>
+    <p>Arrastra el slider para comparar detalle fino, bordes y compresion. Sirve para explicar por que ABR no solo cambia numeros: cambia la percepcion de calidad cuando la red lo permite.</p>
+    <div class="compare-stage" id="compare-stage">
+      <video id="compare-low" muted playsinline loop></video>
+      <video id="compare-high" class="compare-high" muted playsinline loop></video>
+      <span class="compare-label high">1080p</span>
+      <span class="compare-label low">480p</span>
+      <span class="compare-divider"></span>
+    </div>
+    <input class="compare-slider" id="compare-slider" type="range" min="0" max="100" value="50" aria-label="Comparar 480p contra 1080p" />
+    <div class="compare-controls">
+      <button id="compare-play">Reproducir comparador</button>
+      <button id="compare-sync">Sincronizar con video principal</button>
+    </div>
+  </div>
+</section>
+
 <section class="roadmap">
   <div class="roadmap-header">
     <p class="eyebrow">Roadmap tecnico</p>
@@ -964,8 +1228,34 @@ const m = {
   throttle: document.getElementById('m-throttle'),
 };
 
+const qoe = {
+  score: document.getElementById('qoe-score'),
+  ring: document.getElementById('qoe-score-ring'),
+  state: document.getElementById('qoe-state'),
+  startup: document.getElementById('qoe-startup'),
+  startupBar: document.getElementById('qoe-startup-bar'),
+  buffer: document.getElementById('qoe-buffer'),
+  bufferBar: document.getElementById('qoe-buffer-bar'),
+  stall: document.getElementById('qoe-stall'),
+  stallBar: document.getElementById('qoe-stall-bar'),
+  switch: document.getElementById('qoe-switch'),
+  switchBar: document.getElementById('qoe-switch-bar'),
+  bitrate: document.getElementById('qoe-bitrate'),
+  bitrateBar: document.getElementById('qoe-bitrate-bar'),
+};
+
 const history = []; // {t, bw, buf}
 const MAX_POINTS = 120;
+const qoeState = {
+  pageStartedAt: performance.now(),
+  firstPlayAt: null,
+  startupSeconds: 0,
+  stalls: 0,
+  switches: 0,
+  currentHeight: 0,
+  currentBitrate: 0,
+  lastBuffer: 0,
+};
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -985,9 +1275,11 @@ async function setThrottle(kbps) {
       b.classList.toggle('active', Number(b.dataset.kbps) === j.kbps);
     });
     showToast('Red: ' + (j.kbps === 0 ? 'sin limite' : j.kbps + ' kbps'));
+    return j.kbps;
   } catch {
     m.throttle.textContent = 'estatico (GitHub Pages)';
     showToast('Throttling disponible solo con server.py local');
+    return null;
   }
 }
 
@@ -1003,6 +1295,83 @@ document.getElementById('reset-buf').addEventListener('click', () => {
   const t = video.currentTime;
   video.currentTime = Math.max(0, t - 0.001);
   showToast('Buffer reseteado');
+});
+
+const profileName = document.getElementById('profile-name');
+const profileStep = document.getElementById('profile-step');
+const failureButtons = document.querySelectorAll('#failure-buttons button');
+let profileTimer = null;
+
+const NETWORK_PROFILES = {
+  metro: {
+    name: 'Metro / movilidad',
+    steps: [
+      { kbps: 3500, label: 'senal buena al inicio', ms: 6000 },
+      { kbps: 600, label: 'entrada a zona saturada', ms: 7000 },
+      { kbps: 300, label: 'microcorte / celda congestionada', ms: 6000 },
+      { kbps: 1500, label: 'recuperacion parcial', ms: 7000 },
+      { kbps: 3500, label: 'senal estable otra vez', ms: 8000 },
+    ]
+  },
+  wifi: {
+    name: 'WiFi saturado',
+    steps: [
+      { kbps: 1500, label: 'red compartida con carga media', ms: 7000 },
+      { kbps: 600, label: 'alguien descarga en la misma red', ms: 9000 },
+      { kbps: 1500, label: 'buffer se estabiliza', ms: 7000 },
+      { kbps: 10000, label: 'red liberada', ms: 8000 },
+    ]
+  },
+  mobile: {
+    name: '4G inestable',
+    steps: [
+      { kbps: 300, label: 'arranque dificil', ms: 6000 },
+      { kbps: 3500, label: 'pico temporal de ancho de banda', ms: 6000 },
+      { kbps: 600, label: 'caida de throughput', ms: 6000 },
+      { kbps: 1500, label: 'ABR busca calidad sostenible', ms: 8000 },
+    ]
+  },
+  fiber: {
+    name: 'Fibra estable',
+    steps: [
+      { kbps: 10000, label: 'recuperacion premium sostenida', ms: 18000 },
+    ]
+  },
+};
+
+function stopNetworkProfile() {
+  clearTimeout(profileTimer);
+  profileTimer = null;
+  failureButtons.forEach(b => b.classList.remove('active'));
+}
+
+async function runNetworkProfile(key, idx = 0) {
+  const profile = NETWORK_PROFILES[key];
+  if (!profile) return;
+  if (idx === 0) {
+    stopNetworkProfile();
+    document.querySelector(`#failure-buttons button[data-profile="${key}"]`)?.classList.add('active');
+    profileName.textContent = profile.name;
+  }
+
+  const step = profile.steps[idx];
+  if (!step) {
+    profileStep.textContent = 'Perfil terminado. El player queda en el ultimo estado de red.';
+    failureButtons.forEach(b => b.classList.remove('active'));
+    return;
+  }
+
+  const applied = await setThrottle(step.kbps);
+  profileStep.textContent = applied === null
+    ? 'En GitHub Pages usa DevTools Network throttling para simular esta falla.'
+    : `${step.label} · ${step.kbps === 0 ? 'sin limite' : step.kbps + ' kbps'}`;
+  if (applied === null) return;
+
+  profileTimer = setTimeout(() => runNetworkProfile(key, idx + 1), step.ms);
+}
+
+failureButtons.forEach(btn => {
+  btn.addEventListener('click', () => runNetworkProfile(btn.dataset.profile));
 });
 
 if (Hls.isSupported()) {
@@ -1021,6 +1390,21 @@ if (Hls.isSupported()) {
   window._hls = hls;
   hls.loadSource('stream/master.m3u8');
   hls.attachMedia(video);
+
+  video.addEventListener('playing', () => {
+    if (qoeState.firstPlayAt === null) {
+      qoeState.firstPlayAt = performance.now();
+      qoeState.startupSeconds = (qoeState.firstPlayAt - qoeState.pageStartedAt) / 1000;
+      updateQoe();
+    }
+  });
+
+  video.addEventListener('waiting', () => {
+    if (qoeState.firstPlayAt !== null) {
+      qoeState.stalls += 1;
+      updateQoe();
+    }
+  });
 
   hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
     levelsEl.innerHTML = '';
@@ -1045,6 +1429,12 @@ if (Hls.isSupported()) {
     m.level.textContent = lv.height + 'p (nivel ' + data.level + ')';
     m.res.textContent = lv.width + ' x ' + lv.height;
     m.bitrate.textContent = Math.round(lv.bitrate / 1000) + ' kbps';
+    if (qoeState.currentHeight && qoeState.currentHeight !== lv.height) {
+      qoeState.switches += 1;
+    }
+    qoeState.currentHeight = lv.height;
+    qoeState.currentBitrate = Math.round(lv.bitrate / 1000);
+    updateQoe();
     refreshActive(data.level);
   });
 
@@ -1058,6 +1448,7 @@ if (Hls.isSupported()) {
     const bw = Math.round(hls.bandwidthEstimate / 1000);
     m.bw.textContent = bw + ' kbps';
     pushPoint(bw);
+    updateQoe();
   });
 
   function pushPoint(bw) {
@@ -1066,6 +1457,7 @@ if (Hls.isSupported()) {
       buf = video.buffered.end(video.buffered.length - 1) - video.currentTime;
     }
     m.buf.textContent = buf.toFixed(1) + ' s';
+    qoeState.lastBuffer = Math.max(0, buf);
     history.push({ bw, buf });
     if (history.length > MAX_POINTS) history.shift();
     drawChart();
@@ -1075,6 +1467,8 @@ if (Hls.isSupported()) {
     if (video.buffered.length) {
       const buf = video.buffered.end(video.buffered.length - 1) - video.currentTime;
       m.buf.textContent = Math.max(0, buf).toFixed(1) + ' s';
+      qoeState.lastBuffer = Math.max(0, buf);
+      updateQoe();
     }
   }, 500);
 
@@ -1109,6 +1503,104 @@ if (Hls.isSupported()) {
     ctx.stroke();
   }
 }
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function setQoeBar(el, pct, color) {
+  el.style.setProperty('--w', `${clamp(pct, 0, 100)}%`);
+  el.style.background = color;
+}
+
+function updateQoe() {
+  const startupPenalty = clamp(qoeState.startupSeconds * 5, 0, 20);
+  const bufferPenalty = qoeState.lastBuffer >= 8 ? 0 : clamp((8 - qoeState.lastBuffer) * 4, 0, 32);
+  const stallPenalty = clamp(qoeState.stalls * 14, 0, 35);
+  const switchPenalty = clamp(qoeState.switches * 4, 0, 18);
+  const bitrateBonus = qoeState.currentHeight >= 1080 ? 5 : qoeState.currentHeight >= 720 ? 2 : 0;
+  const score = clamp(Math.round(100 - startupPenalty - bufferPenalty - stallPenalty - switchPenalty + bitrateBonus), 0, 100);
+
+  const color = score >= 80 ? 'var(--good)' : score >= 60 ? 'var(--warn)' : 'var(--bad)';
+  qoe.score.textContent = score;
+  qoe.ring.style.setProperty('--score', score);
+  qoe.ring.style.background = `radial-gradient(circle at center, var(--panel) 58%, transparent 59%), conic-gradient(${color} 0deg, ${color} ${score * 3.6}deg, #30363d 0deg)`;
+  qoe.state.textContent = score >= 80 ? 'Experiencia saludable' : score >= 60 ? 'Experiencia en riesgo' : 'Riesgo alto de abandono';
+
+  qoe.startup.textContent = `${qoeState.startupSeconds.toFixed(1)}s`;
+  setQoeBar(qoe.startupBar, 100 - startupPenalty * 4, startupPenalty > 12 ? 'var(--warn)' : 'var(--good)');
+
+  qoe.buffer.textContent = `${qoeState.lastBuffer.toFixed(1)}s`;
+  setQoeBar(qoe.bufferBar, qoeState.lastBuffer * 10, qoeState.lastBuffer < 3 ? 'var(--bad)' : qoeState.lastBuffer < 8 ? 'var(--warn)' : 'var(--good)');
+
+  qoe.stall.textContent = String(qoeState.stalls);
+  setQoeBar(qoe.stallBar, 100 - qoeState.stalls * 22, qoeState.stalls ? 'var(--bad)' : 'var(--good)');
+
+  qoe.switch.textContent = String(qoeState.switches);
+  setQoeBar(qoe.switchBar, 100 - qoeState.switches * 10, qoeState.switches > 3 ? 'var(--warn)' : 'var(--good)');
+
+  qoe.bitrate.textContent = qoeState.currentBitrate ? `${qoeState.currentBitrate} kbps` : '-';
+  setQoeBar(qoe.bitrateBar, qoeState.currentHeight ? qoeState.currentHeight / 10.8 : 0, qoeState.currentHeight >= 720 ? 'var(--good)' : 'var(--warn)');
+}
+
+// =====================================================================
+// Comparador visual: 480p vs 1080p con slider
+// =====================================================================
+
+const compareStage = document.getElementById('compare-stage');
+const compareSlider = document.getElementById('compare-slider');
+const compareLow = document.getElementById('compare-low');
+const compareHigh = document.getElementById('compare-high');
+const comparePlay = document.getElementById('compare-play');
+const compareSync = document.getElementById('compare-sync');
+const comparePlayers = [];
+
+function attachHlsVideo(el, src) {
+  if (Hls.isSupported()) {
+    const h = new Hls({ maxBufferLength: 10, capLevelToPlayerSize: false });
+    h.loadSource(src);
+    h.attachMedia(el);
+    return h;
+  }
+  if (el.canPlayType('application/vnd.apple.mpegurl')) {
+    el.src = src;
+  }
+  return null;
+}
+
+comparePlayers.push(attachHlsVideo(compareLow, 'stream/480p/playlist.m3u8'));
+comparePlayers.push(attachHlsVideo(compareHigh, 'stream/1080p/playlist.m3u8'));
+
+compareSlider.addEventListener('input', () => {
+  compareStage.style.setProperty('--split', `${compareSlider.value}%`);
+});
+
+function syncCompareToMain() {
+  const t = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+  compareLow.currentTime = t;
+  compareHigh.currentTime = t;
+}
+
+comparePlay.addEventListener('click', async () => {
+  syncCompareToMain();
+  try {
+    await Promise.allSettled([compareLow.play(), compareHigh.play()]);
+    comparePlay.textContent = 'Comparador reproduciendo';
+  } catch {
+    showToast('Da play manualmente en el comparador');
+  }
+});
+
+compareSync.addEventListener('click', () => {
+  syncCompareToMain();
+  showToast('Comparador sincronizado');
+});
+
+compareHigh.addEventListener('timeupdate', () => {
+  if (Math.abs(compareHigh.currentTime - compareLow.currentTime) > 0.35) {
+    compareLow.currentTime = compareHigh.currentTime;
+  }
+});
 
 fetch('api/throttle').then(r => {
   if (!r.ok) throw new Error('throttle api unavailable');
