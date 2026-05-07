@@ -1071,7 +1071,7 @@
         </div>
         <small style="color:var(--muted); font-size:11px;">iPhone, iPad, Apple TV, Safari</small>
       </div>
-      <video id="cmaf-hls" controls muted></video>
+      <video id="cmaf-hls" controls autoplay muted playsinline preload="auto"></video>
       <div class="foot" id="cmaf-hls-foot">cargando manifest.m3u8...</div>
     </div>
 
@@ -1083,7 +1083,7 @@
         </div>
         <small style="color:var(--muted); font-size:11px;">Android, Chrome, Edge, Xbox</small>
       </div>
-      <video id="cmaf-dash" controls muted></video>
+      <video id="cmaf-dash" controls autoplay muted playsinline preload="auto"></video>
       <div class="foot" id="cmaf-dash-foot">cargando manifest.mpd...</div>
     </div>
   </div>
@@ -1624,6 +1624,7 @@ const CMAF_DASH_URL = 'stream-cmaf/manifest.mpd';
 const cmafFootHls  = document.getElementById('cmaf-hls-foot');
 const cmafFootDash = document.getElementById('cmaf-dash-foot');
 const feedList     = document.getElementById('feed-list');
+const shouldAutoOpenCmaf = window.location.hash === '#cmaf';
 
 // Tracking de archivos descargados por cada player
 const downloadsByFile = new Map(); // filename -> Set<'hls'|'dash'>
@@ -1660,6 +1661,16 @@ function renderFeed() {
   }
 }
 
+function autoOpenCmafVideo(videoEl) {
+  if (!shouldAutoOpenCmaf) return;
+  document.getElementById('cmaf')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  videoEl.muted = true;
+  videoEl.setAttribute('playsinline', '');
+  videoEl.play().catch(() => {
+    cmafFootHls.textContent = 'Listo para reproducir. iOS puede requerir un tap para iniciar.';
+  });
+}
+
 // --- Player HLS (lado Apple) ---
 const cmafHlsVideo = document.getElementById('cmaf-hls');
 if (Hls.isSupported()) {
@@ -1676,6 +1687,7 @@ if (Hls.isSupported()) {
     hlsCmaf.loadLevel = topLevel;
     hlsCmaf.nextLevel = topLevel;
     cmafFootHls.textContent = '1080p fijo para demostrar CMAF compartido';
+    autoOpenCmafVideo(cmafHlsVideo);
   });
   hlsCmaf.on(Hls.Events.FRAG_LOADED, (_, data) => {
     const url = data.frag.url;
@@ -1685,6 +1697,7 @@ if (Hls.isSupported()) {
 } else if (cmafHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
   cmafHlsVideo.src = CMAF_HLS_URL;
   cmafFootHls.textContent = 'HLS reproducido nativamente (Safari)';
+  cmafHlsVideo.addEventListener('loadedmetadata', () => autoOpenCmafVideo(cmafHlsVideo), { once: true });
 }
 
 // --- Player DASH (lado Google/Microsoft) ---
@@ -1716,13 +1729,14 @@ dashPlayer.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => {
 // =====================================================================
 
 function renderQr(url) {
-  document.getElementById('lan-url').textContent = url;
+  const targetUrl = url.split('#')[0] + '#cmaf';
+  document.getElementById('lan-url').textContent = targetUrl;
   const qrEl = document.getElementById('qr');
   qrEl.innerHTML = '';
 
   if (typeof QRCode !== 'undefined') {
     new QRCode(qrEl, {
-      text: url,
+      text: targetUrl,
       width: 200,
       height: 200,
       colorDark: '#000000',
